@@ -1,20 +1,18 @@
-<h1>Peppi esimerkki</h1>
+# Peppi esimerkki
 
-<p>Tämän esimerkin on tarkoitus auttaa ohjelmistoprojektin pankkiautomaatin suunnittelussa ja toteutuksessa. Esimerkin aiheena on Peppi oppilasrekisteriä vastaavan ohjelmiston rakentaminen. Esimerkin sovellukseen on otettu vain pieni osuus Peppi järjestelemästä.</p>
+Tämän esimerkin on tarkoitus auttaa ohjelmistoprojektin pankkiautomaatin suunnittelussa ja toteutuksessa. Esimerkin aiheena on Peppi oppilasrekisteriä vastaavan ohjelmiston rakentaminen. Esimerkin sovellukseen on otettu vain pieni osuus Peppi järjestelemästä.
 
-<h2>Järjestelmän toiminnan kuvaus</h2>
-<p>
-    Sovellukseen toteutetaan seuraavat toiminnot:
-    <ul>
-    <li>Voidakseen katsoa henkilötietonsa opiskelijan on kirjauduttava sovellukseen.</li>
-    <li>Voidakseen katsoa arvosanansa opiskelijan on kirjauduttava sovellukseen.</li>
-    <li>Voidakseen ilmoittautua kurssille opiskelijan on kirjauduttava sovellukseen.</li>
-    <li>Jos kirjautuminen onnistuu opiskelijalle avautuu valikko, josta hän voi valita joko katso henkilötiedot tai katso arvosanat.</li>
-    <li>Mikäli kirjautuminen ei onnistu, palataan kirjautumisruudulle.</li>
-    </ul>
-</p>
+## Järjestelmän toiminnan kuvaus
 
-<h2>Käyttötapauskaavio</h2>
+Sovellukseen toteutetaan seuraavat toiminnot:
+
+- Voidakseen katsoa henkilötietonsa opiskelijan on kirjauduttava sovellukseen.
+- Voidakseen katsoa arvosanansa opiskelijan on kirjauduttava sovellukseen.
+- Voidakseen ilmoittautua kurssille opiskelijan on kirjauduttava sovellukseen.
+- Jos kirjautuminen onnistuu opiskelijalle avautuu valikko, josta hän voi valita joko katso henkilötiedot tai katso arvosanat.
+- Mikäli kirjautuminen ei onnistu, palataan kirjautumisruudulle.
+
+## Käyttötapauskaavio
 
 ```mermaid
 flowchart TD
@@ -34,55 +32,205 @@ flowchart TD
     UC_Login -->|"if unsuccessful, return to login"| UC_Login
 ```
 
-<h2>Viestiyhteyskaavio</h2>
-<p>
+## Viestiyhteyskaavio
+
 Seuraavaksi luotiin viestiyhteyskaavio
-<br><img src="./UML/mySequence.png">
-</p>
 
-<h2>Käyttöönottokaavio</h2>
-<p>
+```mermaid
+sequenceDiagram
+    actor Student
+    participant UI as User Interface
+    participant LC as LoginController
+    participant DB as User Database
+
+    Student->>UI: Enter credentials
+    UI->>LC: Submit login request
+    LC->>DB: Verify credentials
+    DB->>LC: Return verification result
+    LC->>UI: Show menu if successful
+    UI->>Student: Display options
+    LC->>UI: Return to login if unsuccessful
+
+    Student->>UI: Select "View Personal Info"
+    UI->>LC: Request info
+    LC->>DB: Fetch info
+    DB->>LC: Return info
+    LC->>UI: Display info
+    UI->>Student: Show info
+
+    Student->>UI: Select "View Grades"
+    UI->>LC: Request grades
+    LC->>DB: Fetch grades
+    DB->>LC: Return grades
+    LC->>UI: Display grades
+    UI->>Student: Show grades
+
+    Student->>UI: Select "Register for Course"
+    UI->>LC: Request registration
+    LC->>DB: Register student
+    DB->>LC: Confirm registration
+    LC->>UI: Show confirmation
+    UI->>Student: Display confirmation
+```
+
+## Käyttöönottokaavio
+
 Seuraavaksi suunniteltiin ohjelmiston arkkitehtuuria. Päätettiin, että käytetään MySQL-tietokantaa, REST API tehdään käyttäen Node.js/Express.js alustaa ja käyttäjän sovellus tehtään C++ ohjelointikielellä käyttäen Qt-frameworkkiä. Tällä perusteella laadittiin käyttöönottokaavio
-<br><img src="./UML/myDeployment.png">
-</p>
 
-<h2>Komponenttikaavio</h2>
-<p>
+```mermaid
+flowchart TD
+    subgraph ClientMachine["Client Machine"]
+        QtApp["Qt application"]
+    end
+
+    subgraph Server["Server"]
+        RestAPI["REST API (Node.js/Express)"]
+        Database[("Database (MySQL/MariaDB)")]
+    end
+
+    QtApp -->|"HTTP Requests"| RestAPI
+    RestAPI -->|"Read/Write Operations"| Database
+    Database -->|"Query Responses"| RestAPI
+    RestAPI -->|"JSON Responses"| QtApp
+```
+
+## Komponenttikaavio
+
 Seuraavaksi suunniteltiin ohjelmiston komponentit ja laadittiin komponenttikaavio
-<br><img src="./UML/myComponent.png">
-</p>
 
-<h2>Luokkakaavio</h2>
-<p>
+```mermaid
+flowchart TD
+    subgraph peppi["<<Qt>> peppi"]
+        MainWindow["MainWindow"]
+        Login_Qt["Login"]
+        StudentInfo_Qt["StudentInfo"]
+        MainWindow --> Login_Qt
+        Login_Qt --> StudentInfo_Qt
+    end
+
+    subgraph backend["<<REST API>> backend"]
+        RouteLogin["RouteLogin"]
+        RouteStudent["RouteStudent"]
+        RouteGrade["RouteGrade"]
+        Student_model["Student_model"]
+        Grade_model["Grade_model"]
+        DatabaseJs["Database.js"]
+        RouteLogin --> Student_model
+        RouteStudent --> Student_model
+        RouteGrade --> Grade_model
+        Student_model --> DatabaseJs
+        Grade_model --> DatabaseJs
+    end
+
+    subgraph mysql["<<MySQL>>"]
+        peppidb[("peppidb")]
+    end
+
+    Login_Qt -->|"HTTP"| RouteLogin
+    StudentInfo_Qt -->|"HTTP"| RouteStudent
+    DatabaseJs --> peppidb
+```
+
+## Luokkakaavio
+
 Seuraavaksi suunniteltiin ohjelmiston luokat ja laadittiin luokkakaaviot
-</p>
-<b>REST API:n luokkakaavio</b> <br>
-<br><img src="./UML/myRestApiClass.png">
-</p>
-</p>
-<b>Qt sovelluksen luokkakaavio</b> <br>
-<br><img src="./UML/myPeppiClass.png">
-</p>
-<hr>
-<h2>Tietokannan suunnittelu</h2>
-<p>
-Aluksi tietokannan ER-kaaviota hahmoteltiin kynällä ja paperilla ja saatiin seuraavat kuvat:
-<br>
-<img src="./UML/er_plan.png">
-<br>
-Kaaviota piirettiin siis niin pitkälle, että todettiin ettei monen-suhde-moneen yhteyksiä ole.
-</p>
-<p>
-    Tämän jälkeen tietokannan taulut luotiin MySQL-Workbench sovelluksella. Tauluihin merkittiin kentät, perusavaimet ja luotiin viiteavaimien avulla viite-eheys. Tämän jälkeen Workbenchillä generoitiin tietokanta ja ER-kaavio. Nyt tietokanta ja sen ER-malli ovat varmasti yhtäpitävät.
-<br>
-<img src="./UML/er_model_final.png">
-<br>
-</p>
-<h2>Käyttöliittymän suunnittelu</h2>
-<p>
-Käyttöliittymää hahmoteltiin seuraavissa kuvissa. Tarkoitus olisi piirtää paremmat kuvat ennen toteutusta. 
-<br>
-<img src="./UML/frontend_plan.png">
-<br>  
-</p>
 
+**REST API:n luokkakaavio**
+
+```mermaid
+classDiagram
+    class App {
+        -router Router
+        +authenticateToken(request, response, next) void
+        +use(root) void
+        +use(login) void
+        +use(student) void
+    }
+
+    class Login {
+        -router Router
+        -bcrypt bcryptjs
+        -jwt jsonwebtoken
+        -dotenv dotenv
+        -generateAccessToken(string) jsonwebtoken
+        +POST() void
+    }
+
+    class RouterStudent {
+        -router Router
+        +GET() jsonArray
+        +GET(username) jsonObject
+        +POST(jsonArray) int
+        +PUT(string, jsonArray) int
+        +DELETE(string) int
+    }
+
+    class StudentModel {
+        -query(string) void
+        +getAll(callback) QueryResult
+        +getOne(string, callback) QueryResult
+        +add(jsonArray, callback) QueryResult
+        +update(string, jsonArray, callback) QueryResult
+        +delete(string, callback) QueryResult
+    }
+
+    App --> Login
+    App --> RouterStudent
+    RouterStudent --> StudentModel
+    Login --> StudentModel
+```
+
+**Qt sovelluksen luokkakaavio**
+
+```mermaid
+classDiagram
+    class MainWindow {
+        -objLogin Login
+        -on_btnStart_clicked() void
+    }
+
+    class Login {
+        -postManager QNetworkAccessManager
+        -reply QNetworkReply
+        -response_data QByteArray
+        -objStudentInfo StudentInfo
+        -on_btnLogin_clicked() void
+        -loginSlot(reply) void
+    }
+
+    class StudentInfo {
+        -username QString
+        -myToken QByteArray
+        -gradeManager QNetworkAccessManager
+        -reply QNetworkReply
+        -response_data QByteArray
+        -on_btnData_clicked() void
+        -on_btnGrade_clicked() void
+        -gradeSlot(reply) void
+        +setUsername(newUsername) void
+        +setMyToken(newMyToken) void
+    }
+
+    MainWindow *-- Login
+    Login *-- StudentInfo
+```
+
+---
+
+## Tietokannan suunnittelu
+
+Aluksi tietokannan ER-kaaviota hahmoteltiin kynällä ja paperilla ja saatiin seuraavat kuvat:
+
+![ER-kaavion luonnos](./UML/er_plan.png)
+
+Kaaviota piirettiin siis niin pitkälle, että todettiin ettei monen-suhde-moneen yhteyksiä ole.
+
+Tämän jälkeen tietokannan taulut luotiin MySQL-Workbench sovelluksella. Tauluihin merkittiin kentät, perusavaimet ja luotiin viiteavaimien avulla viite-eheys. Tämän jälkeen Workbenchillä generoitiin tietokanta ja ER-kaavio. Nyt tietokanta ja sen ER-malli ovat varmasti yhtäpitävät.
+
+![ER-malli](./UML/er_model_final.png)
+
+## Käyttöliittymän suunnittelu
+
+Käyttöliittymää hahmoteltiin seuraavissa kuvissa. Tarkoitus olisi piirtää paremmat kuvat ennen toteutusta.
+
+![Käyttöliittymän suunnitelma](./UML/frontend_plan.png)
