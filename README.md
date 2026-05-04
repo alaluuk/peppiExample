@@ -16,8 +16,23 @@
 
 <h2>Käyttötapauskaavio</h2>
 <p>
-Edellisten tarinoiden perusteella luotiin seuraava käyttötapauskaavio 
-<br><img src="./UML/myUseCase.png">
+```mermaid
+flowchart TD
+    Student(["👤 Student"])
+
+    subgraph Application
+        UC_Login["Log in"]
+        UC_ViewInfo["View personal information"]
+        UC_ViewGrades["View grades"]
+        UC_RegisterCourse["Register for course"]
+    end
+
+    Student --> UC_Login
+    UC_Login -->|"if successful"| UC_ViewInfo
+    UC_Login -->|"if successful"| UC_ViewGrades
+    UC_Login -->|"if successful"| UC_RegisterCourse
+    UC_Login -->|"if unsuccessful, return to login"| UC_Login
+```
 </p>
 
 <h2>Viestiyhteyskaavio</h2>
