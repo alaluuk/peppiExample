@@ -15,7 +15,7 @@
 </p>
 
 <h2>Käyttötapauskaavio</h2>
-<p>
+
 ```mermaid
 flowchart TD
     Student(["👤 Student"])
@@ -33,7 +33,6 @@ flowchart TD
     UC_Login -->|"if successful"| UC_RegisterCourse
     UC_Login -->|"if unsuccessful, return to login"| UC_Login
 ```
-</p>
 
 <h2>Viestiyhteyskaavio</h2>
 <p>
